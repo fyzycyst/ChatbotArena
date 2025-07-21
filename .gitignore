@@ -3,3 +3,9 @@ config.js
 
 # Ignore macOS specific files
 .DS_Store
+
+# Ignore tasks directory
+tasks/
+
+# Ignore test files directory
+test_files/

@@ -103,6 +103,10 @@
                         <label for="initial-prompt" class="block text-sm font-medium text-gray-300 mb-1">Initial Topic / Prompt</label>
                         <textarea id="initial-prompt" rows="6" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Discuss the pros and cons of decentralized finance."></textarea>
                     </div>
+                    <div class="mt-4">
+                        <label for="file-input" class="block text-sm font-medium text-gray-300 mb-1">Attach Files (optional)</label>
+                        <input type="file" id="file-input" multiple class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"/>
+                    </div>
                 </div>
             </div>
             <!-- Action Buttons -->
@@ -166,6 +170,7 @@
             const botBLoader = document.getElementById('bot-b-loader');
             
             const initialPromptInput = document.getElementById('initial-prompt');
+            const fileInput = document.getElementById('file-input');
             const maxTurnsInput = document.getElementById('max-turns');
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
@@ -318,6 +323,7 @@
                 botASelect.disabled = running;
                 botBSelect.disabled = running;
                 initialPromptInput.disabled = running;
+                fileInput.disabled = running;
                 maxTurnsInput.disabled = running;
             }
 
@@ -329,12 +335,23 @@
 
                 const botAId = botASelect.value;
                 const botBId = botBSelect.value;
-                const initialPrompt = initialPromptInput.value.trim();
+                let initialPrompt = initialPromptInput.value.trim();
                 const maxTurns = parseInt(maxTurnsInput.value, 10);
+                const files = fileInput.files;
 
                 if (botAId === botBId) {
                     displayError('Please select two different bots for the discussion.');
                     return;
+                }
+
+                // Read file contents and prepend to the prompt
+                if (files.length > 0) {
+                    let fileContents = "";
+                    for (const file of files) {
+                        fileContents += await file.text();
+                        fileContents += "\n\n";
+                    }
+                    initialPrompt = `Attached File(s) Content:\n\n${fileContents}--- End of File(s) Content ---\n\nInitial Prompt:\n\n${initialPrompt}`;
                 }
 
                 const botAConfig = { ...BOT_CONFIG[botAId], apiKey: API_KEYS[BOT_CONFIG[botAId].keyName] };
