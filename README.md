@@ -69,8 +69,9 @@ That's it! Simply **double-click the `index.html` file** to open it in your favo
 2.  **Select Bot B:** Choose the second debater from the "Bot B" dropdown.
 3.  **Set Max Turns:** Decide how many times each bot should respond.
 4.  **Write a Prompt:** Enter the topic or initial question for the discussion in the "Discussion Topic" box.
-5.  **(Optional) Attach Files:** Click the "Choose Files" button to select one or more text files. Their content will be added to the start of the prompt.
-6.  **Click "Start Discussion"** and watch the conversation unfold!
+5.  **(Optional) Provide Bot Instructions:** Enter specific instructions for each bot in the "Bot A Instructions" and "Bot B Instructions" text areas. This allows you to assign different roles or perspectives to the bots.
+6.  **(Optional) Attach Files:** Click the "Choose Files" button to select one or more text files. Their content will be added to the start of the prompt.
+7.  **Click "Start Discussion"** and watch the conversation unfold!
 
 You can use the **Stop** button to end the discussion early or the **Reset** button to clear everything and start over.
 

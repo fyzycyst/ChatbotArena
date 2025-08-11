@@ -101,9 +101,19 @@
                     <h2 class="text-xl font-semibold mb-4 text-gray-200 border-b border-gray-600 pb-2">Discussion Topic</h2>
                     <div>
                         <label for="initial-prompt" class="block text-sm font-medium text-gray-300 mb-1">Initial Topic / Prompt</label>
-                        <textarea id="initial-prompt" rows="6" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Discuss the pros and cons of decentralized finance."></textarea>
+                        <textarea id="initial-prompt" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Discuss the pros and cons of decentralized finance."></textarea>
                     </div>
-                    <div class="mt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                        <div>
+                            <label for="bot-a-instructions" class="block text-sm font-medium text-gray-300 mb-1">Bot A Instructions (Optional)</label>
+                            <textarea id="bot-a-instructions" rows="2" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., You are a skeptical scientist..."></textarea>
+                        </div>
+                        <div>
+                            <label for="bot-b-instructions" class="block text-sm font-medium text-gray-300 mb-1">Bot B Instructions (Optional)</label>
+                            <textarea id="bot-b-instructions" rows="2" class="w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., You are an optimistic futurist..."></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-3">
                         <label for="file-input" class="block text-sm font-medium text-gray-300 mb-1">Attach Files (optional)</label>
                         <input type="file" id="file-input" multiple class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"/>
                     </div>
@@ -116,6 +126,7 @@
                 <button id="reset-btn" class="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-all duration-200">Reset</button>
             </div>
              <div id="error-box" class="mt-4 text-red-400 text-center font-medium"></div>
+             <div id="status-indicator" class="mt-4 text-center font-medium"></div>
         </div>
 
         <!-- Discussion Arena -->
@@ -176,6 +187,9 @@
             const stopBtn = document.getElementById('stop-btn');
             const resetBtn = document.getElementById('reset-btn');
             const errorBox = document.getElementById('error-box');
+            const statusIndicator = document.getElementById('status-indicator');
+            const botAInstructionsInput = document.getElementById('bot-a-instructions');
+            const botBInstructionsInput = document.getElementById('bot-b-instructions');
 
             console.log("botASelect element:", botASelect);
             console.log("botBSelect element:", botBSelect);
@@ -187,19 +201,26 @@
 
             // --- State ---
             let isRunning = false;
+            let discussionCompleted = false;
             let conversationHistory = [];
             let currentTurn = 0;
 
             /**
              * Calls the Gemini API.
              */
-            async function callGeminiApi(config, history) {
+            async function callGeminiApi(config, history, instructions) {
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.apiKey}`;
+                
+                let geminiHistory = [...history];
+                if (instructions) {
+                    geminiHistory.unshift({ role: 'user', parts: [{ text: `Your instructions are: "${instructions}"` }]});
+                }
+
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: history,
+                        contents: geminiHistory,
                         generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
                     }),
                 });
@@ -217,8 +238,8 @@
             /**
              * Calls any OpenAI-compatible API (OpenAI, xAI).
              */
-            async function callOpenAICompatibleApi(config, history) {
-                const systemPrompt = { role: 'system', content: `You are a helpful AI assistant in a debate with another AI. Respond to the last statement from your opponent.` };
+            async function callOpenAICompatibleApi(config, history, instructions) {
+                const systemPrompt = { role: 'system', content: instructions || `You are a helpful AI assistant in a debate with another AI. Respond to the last statement from your opponent.` };
                 const openAiHistory = [
                     systemPrompt,
                     ...history.slice(1).map(msg => ({
@@ -253,8 +274,8 @@
             /**
              * Calls the Anthropic API.
              */
-            async function callAnthropicApi(config, history) {
-                const systemPrompt = `You are a helpful AI assistant, ${config.displayName}, in a debate with another AI. Respond to the last statement from your opponent. The initial topic was: "${initialPromptInput.value.trim()}"`;
+            async function callAnthropicApi(config, history, instructions) {
+                const systemPrompt = instructions || `You are a helpful AI assistant, ${config.displayName}, in a debate with another AI. Respond to the last statement from your opponent. The initial topic was: "${initialPromptInput.value.trim()}"`;
                 const anthropicHistory = history.map(msg => ({
                     role: msg.role === 'model' ? 'assistant' : 'user',
                     content: msg.parts[0].text
@@ -325,6 +346,28 @@
                 initialPromptInput.disabled = running;
                 fileInput.disabled = running;
                 maxTurnsInput.disabled = running;
+                botAInstructionsInput.disabled = running;
+                botBInstructionsInput.disabled = running;
+
+                if (running) {
+                    statusIndicator.textContent = 'Working...';
+                    statusIndicator.className = 'mt-4 text-yellow-400 text-center font-medium';
+                } else if (discussionCompleted) {
+                    statusIndicator.textContent = 'Complete!';
+                    statusIndicator.className = 'mt-4 text-green-400 text-center font-medium';
+                } else {
+                    statusIndicator.textContent = '';
+                }
+            }
+
+            function getBotPrompt(botConfig, opponentConfig, initialTopic, instructions) {
+                let prompt = `You are a helpful AI assistant, ${botConfig.displayName}, in a debate with another AI, ${opponentConfig.displayName}. Please provide a thoughtful and well-reasoned opening statement on the following topic. Be concise. Topic: "${initialTopic}"`;
+                if (instructions) {
+                    prompt = `Your instructions are: "${instructions}".
+
+${prompt}`;
+                }
+                return prompt;
             }
 
             /**
@@ -332,6 +375,7 @@
              */
             async function startDiscussion() {
                 clearError();
+                discussionCompleted = false;
 
                 const botAId = botASelect.value;
                 const botBId = botBSelect.value;
@@ -368,9 +412,12 @@
 
                 setUiState(true);
                 currentTurn = 0;
-                
-                const initialUserPrompt = `You are a helpful AI assistant, ${botAConfig.displayName}, in a debate with another AI, ${botBConfig.displayName}. Please provide a thoughtful and well-reasoned opening statement on the following topic. Be concise. Topic: "${initialPrompt}"`;
-                conversationHistory = [{ role: 'user', parts: [{ text: initialUserPrompt }] }];
+
+                const botAInstructions = botAInstructionsInput.value.trim();
+                const botBInstructions = botBInstructionsInput.value.trim();
+
+                const botAInitialPrompt = getBotPrompt(botAConfig, botBConfig, initialPrompt, botAInstructions);
+                conversationHistory = [{ role: 'user', parts: [{ text: botAInitialPrompt }] }];
                 
                 const botAFunc = apiImplementations[botAConfig.api];
                 const botBFunc = apiImplementations[botBConfig.api];
@@ -380,7 +427,7 @@
                         // --- Bot A's Turn ---
                         if (!isRunning) break;
                         toggleLoader(botALoader, true);
-                        const botAResponse = await botAFunc(botAConfig, conversationHistory);
+                        const botAResponse = await botAFunc(botAConfig, conversationHistory, botAInstructions);
                         toggleLoader(botALoader, false);
                         displayMessage(botALog, botAResponse, 'bot-a');
                         conversationHistory.push({ role: 'model', parts: [{ text: botAResponse }] });
@@ -388,7 +435,7 @@
                         // --- Bot B's Turn ---
                         if (!isRunning) break;
                         toggleLoader(botBLoader, true);
-                        const botBResponse = await botBFunc(botBConfig, conversationHistory);
+                        const botBResponse = await botBFunc(botBConfig, conversationHistory, botBInstructions);
                         toggleLoader(botBLoader, false);
                         displayMessage(botBLog, botBResponse, 'bot-b');
                         conversationHistory.push({ role: 'user', parts: [{ text: botBResponse }] });
@@ -403,6 +450,7 @@
                 }
                 
                 if (isRunning) {
+                    discussionCompleted = true;
                     setUiState(false);
                 }
             }
@@ -416,9 +464,13 @@
             function resetApplication() {
                 stopDiscussion();
                 clearError();
+                discussionCompleted = false;
+                statusIndicator.textContent = '';
                 botALog.innerHTML = '';
                 botBLog.innerHTML = '';
                 initialPromptInput.value = '';
+                botAInstructionsInput.value = '';
+                botBInstructionsInput.value = '';
                 conversationHistory = [];
                 currentTurn = 0;
                 console.log("Application reset.");
