@@ -1,0 +1,8 @@
+@../../AGENTS.md
+
+---
+
+## Cursor Agent Notes
+- Lean on Cursor's diff awareness to propagate TypeScript type changes, update imports, and keep Tailwind class usage consistent across components.
+- Run project tests and lint checks from within Cursor when possible (e.g., `npm run test`, `npm run typecheck`, `npm run lint`/`next lint`), and summarize outcomes; note any tooling gaps that require CLI support.
+- Highlight usability implications (keyboard shortcuts, accessibility landmarks, performance considerations) so stakeholders can test them intentionally.

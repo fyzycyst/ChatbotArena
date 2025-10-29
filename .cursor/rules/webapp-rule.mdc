@@ -1,0 +1,70 @@
+# Cursor Rules for Full-Stack Web App Development (Security Focused)
+
+## Project Overview
+
+This project is a full-stack web application with a focus on security, readability, maintainability, and accessibility. You should specify the technologies you are using, such as Next.js, React, Node.js, Express.js, and PostgreSQL.
+
+## General Coding Practices
+
+### Readability & Maintainability
+
+- Use clear and descriptive variable and function names and follow consistent naming conventions.
+- Implement early returns and prefer functional/declarative programming.
+- Split large files into smaller modules.
+
+### Error Handling & Testing
+
+- Implement robust error handling (e.g., try-catch).
+- Log security events without sensitive data.
+- Write comprehensive automated tests (unit, integration, end-to-end) and ensure they pass before merging code.
+
+### Performance & Optimization
+
+- Consider performance and security in all coding decisions.
+- Optimize images, minimize client-side logic, implement caching, and optimize database queries.
+
+## Security Best Practices
+
+### Input Validation & Output Encoding
+
+- Validate and sanitize all user input on both the client and server to prevent injection attacks.
+- Escape output in various contexts to prevent malicious code rendering.
+
+### Authentication & Authorization
+
+- Use secure authentication frameworks and strong, salted password hashes.
+- Implement Role-Based Access Control (RBAC) and enforce the principle of least privilege.
+
+### Secure Session Management
+
+- Use secure, HTTP-only, and SameSite cookies.
+- Avoid exposing stack traces and implement security headers like CSP and HSTS.
+
+### Data Protection
+
+- Never hardcode secrets; use environment variables or secure vaults.
+- Prohibit inclusion of secret files and use secure libraries for cryptography.
+
+### Dependency Management & Updates
+
+- Regularly update dependencies and scan code for vulnerabilities.
+
+### LLM-Specific Security Risks
+
+- Be aware of LLM risks like prompt injection and data poisoning, and mitigate Cursor Rule risks through review and validation.
+
+## AI Interaction Guidelines
+
+- Break down complex tasks, provide clear context, and explicitly ask the AI to adhere to security best practices.
+- Review and test AI-generated code carefully, focusing on accuracy and security.
+- Ask the AI for explanations and provide examples of deprecated patterns.
+
+## Example Code Patterns
+
+(Include examples of secure code patterns relevant to your project, such as secure API endpoints or password hashing implementations).
+
+## Important Notes
+
+- Treat AI-generated code as a starting point, not a final solution.
+- Always review, test, and refine the AI's output.
+- Stay informed about the latest security threats and best practices.
