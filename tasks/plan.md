@@ -1,5 +1,19 @@
 # Chatbot Arena Expansion Agile Plan
 
+## Active Task: UI Analog Research (Workspace & Arena)
+
+- [x] Review `docs/expansion-plan.md` for key UX goals.
+- [x] Identify relevant analog products (arenas, playgrounds, workspaces).
+- [x] Capture findings and UI patterns in `docs/UI_Ideas.md`.
+
+## Active Task: Wireframes for Multi-View Workspace
+
+- [x] Identify continuity constraints from `index.html`.
+- [x] Sketch wireframes for Chat Arena, Team of Experts, Prompt Optimizer.
+- [x] Record wireframes and notes in `docs/wireframes.md`.
+
+
+
 ## Overview
 This plan organizes the expansion roadmap into a series of four-week release cycles composed of two-week sprints. Each sprint contains user stories mapped to backlog epics derived from the expansion vision. Stories are accompanied by acceptance criteria and implementation tasks. Cross-cutting enablers and risk mitigation activities are also identified.
 
@@ -139,4 +153,3 @@ This plan organizes the expansion roadmap into a series of four-week release cyc
 - **Daily Standups**: 15 minutes focusing on blockers and coordination.
 - **Sprint Review/Demo**: Last day; showcase completed features to stakeholders.
 - **Sprint Retrospective**: Immediately after review; capture improvements for next sprint.
-
